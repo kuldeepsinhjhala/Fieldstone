@@ -1,12 +1,5 @@
 import { useApp } from '../context/AppContext';
-
-function friendlyName(filename) {
-  return filename
-    .replace(/\.json$/, '')
-    .replace(/[_-]/g, ' ')
-    .replace(/([a-z])([A-Z])/g, '$1 $2')
-    .replace(/\b\w/g, c => c.toUpperCase());
-}
+import { friendlyName } from '../utils/labels';
 
 function FileCard({ file, isActive, onClick }) {
   return (

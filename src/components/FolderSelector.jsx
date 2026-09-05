@@ -1,9 +1,12 @@
 import { useApp } from '../context/AppContext';
 
+const canPickFolder = typeof window !== 'undefined' && typeof window.showDirectoryPicker === 'function';
+
 export default function FolderSelector() {
   const { loadDirectory, dirHandle } = useApp();
 
   const handleSelect = async () => {
+    if (!canPickFolder) return;
     try {
       const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
       await loadDirectory(handle);
@@ -46,13 +49,21 @@ export default function FolderSelector() {
                 d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
             </svg>
           </div>
-          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>No folder selected yet</p>
+          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            {canPickFolder ? 'No folder selected yet' : 'Folder access needs Chrome or Edge on localhost or HTTPS'}
+          </p>
         </div>
       )}
 
-      <button className="btn-orange w-full" onClick={handleSelect}>
-        {dirHandle ? 'Change Folder' : 'Choose Folder'}
-      </button>
+      {canPickFolder ? (
+        <button className="btn-orange w-full" onClick={handleSelect}>
+          {dirHandle ? 'Change Folder' : 'Choose Folder'}
+        </button>
+      ) : (
+        <p className="text-xs text-center" style={{ color: 'var(--text-muted)' }}>
+          Open this app in Chrome or Edge to choose a folder.
+        </p>
+      )}
     </div>
   );
 }

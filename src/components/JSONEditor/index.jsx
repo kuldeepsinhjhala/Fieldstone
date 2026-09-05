@@ -1,13 +1,7 @@
 import { useApp } from '../../context/AppContext';
+import { friendlyName } from '../../utils/labels';
 import NodeEditor from './NodeEditor';
 
-function friendlyName(filename) {
-  return filename
-    .replace(/\.json$/, '')
-    .replace(/[_-]/g, ' ')
-    .replace(/([a-z])([A-Z])/g, '$1 $2')
-    .replace(/\b\w/g, c => c.toUpperCase());
-}
 
 function EmptyState() {
   return (
@@ -27,7 +21,7 @@ function EmptyState() {
         Select a file to edit
       </h2>
       <p className="text-sm max-w-xs" style={{ color: 'var(--text-muted)', lineHeight: '1.6' }}>
-        Pick any file from the sidebar — your data will appear here as a simple form, ready to edit.
+        Pick any file from the sidebar â€” your data will appear here as a simple form, ready to edit.
       </p>
     </div>
   );

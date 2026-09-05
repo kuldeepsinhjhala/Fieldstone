@@ -1,16 +1,23 @@
 import { useState } from 'react';
 import { useApp } from '../context/AppContext';
-
-function friendlyName(filename) {
-  return filename
-    .replace(/\.json$/, '')
-    .replace(/[_-]/g, ' ')
-    .replace(/([a-z])([A-Z])/g, '$1 $2')
-    .replace(/\b\w/g, c => c.toUpperCase());
-}
+import { friendlyName } from '../utils/labels';
 
 export default function Toolbar() {
-  const { activeFile, isDirty, saveFile, createFile, deleteFile, dirHandle, status } = useApp();
+  const {
+    activeFile,
+    isDirty,
+    saveFile,
+    createFile,
+    deleteFile,
+    dirHandle,
+    status,
+    saveError,
+    saveState,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
+  } = useApp();
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -32,11 +39,10 @@ export default function Toolbar() {
     <div className="shrink-0 glass flex items-center gap-2 px-4 py-2.5 flex-wrap"
       style={{ borderTop: 'none', borderLeft: 'none', borderRight: 'none', borderBottom: '1px solid var(--divider)', minHeight: '52px' }}>
 
-      {/* Save */}
       <button
         className="btn-orange flex items-center gap-1.5 text-xs"
         onClick={saveFile}
-        disabled={!activeFile || !isDirty}
+        disabled={!activeFile || !isDirty || saveState === 'saving'}
         style={{ padding: '7px 16px' }}
       >
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -46,9 +52,28 @@ export default function Toolbar() {
         Save Changes{isDirty ? ' •' : ''}
       </button>
 
+      <button
+        className="btn-ghost flex items-center gap-1.5 text-xs"
+        onClick={undo}
+        disabled={!canUndo}
+        title="Undo (Ctrl+Z)"
+        style={{ padding: '7px 14px' }}
+      >
+        Undo
+      </button>
+
+      <button
+        className="btn-ghost flex items-center gap-1.5 text-xs"
+        onClick={redo}
+        disabled={!canRedo}
+        title="Redo (Ctrl+Shift+Z)"
+        style={{ padding: '7px 14px' }}
+      >
+        Redo
+      </button>
+
       <div className="w-px h-5 shrink-0" style={{ background: 'var(--divider)' }} />
 
-      {/* New file */}
       {creating ? (
         <div className="flex items-center gap-2">
           <input
@@ -76,7 +101,6 @@ export default function Toolbar() {
         </button>
       )}
 
-      {/* Delete */}
       {confirmDelete ? (
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium" style={{ color: '#f87171' }}>
@@ -95,7 +119,6 @@ export default function Toolbar() {
         </button>
       )}
 
-      {/* Right side — status or file name */}
       <div className="ml-auto flex items-center gap-3">
         {status.message ? (
           <div className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg animate-fade-in"
@@ -104,7 +127,7 @@ export default function Toolbar() {
               color: status.type === 'error' ? '#f87171' : '#4ade80',
               border: `1px solid ${status.type === 'error' ? 'rgba(239,68,68,0.2)' : 'rgba(34,197,94,0.2)'}`,
             }}>
-            {status.type === 'error' ? '✕' : '✓'} {status.message}
+            {status.type === 'error' ? 'x' : 'ok'} {status.message}
           </div>
         ) : activeFile ? (
           <div className="flex items-center gap-2">
@@ -119,6 +142,18 @@ export default function Toolbar() {
             </span>
           </div>
         ) : null}
+
+        {saveError && activeFile && saveState === 'error' && (
+          <button
+            type="button"
+            className="btn-danger text-xs"
+            onClick={saveFile}
+            style={{ padding: '7px 14px' }}
+            title="Retry save"
+          >
+            Retry Save
+          </button>
+        )}
       </div>
     </div>
   );
